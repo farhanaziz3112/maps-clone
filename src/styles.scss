@@ -1,0 +1,265 @@
+@font-face {
+  font-family: "Space Mono";
+  src: url("./assets//SpaceMono/SpaceMono-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("./assets/Montserrat/Montserrat-VariableFont_wght.ttf");
+}
+
+$gutter: 1rem;
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.css";
+@import "primeicons/primeicons.css";
+
+* {
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+// .p-accordion .p-accordion-header {
+//   border: 2px solid blue;
+// }
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.map {
+  height: 100vh;
+  width: 100vw;
+}
+
+.card {
+  background: var(--surface-card);
+  // background-color: var(--teal-100);
+  border: 1px solid var(--surface-border);
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  box-shadow: var(--card-shadow);
+  border-radius: 12px;
+}
+
+.layout-topbar {
+  background-color: var(--cyan-700);
+  position: fixed;
+  height: 4rem;
+  z-index: 997;
+  left: 0;
+  top: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.02), 0px 0px 2px rgba(0, 0, 0, 0.05),
+    0px 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.topbar-menu {
+  margin-right: auto;
+  position: absolute;
+  left: 1rem;
+}
+
+.layout-main-container {
+  // display: flex;
+  // flex-direction: column;
+  // justify-content: space-between;
+  // padding-top: 2rem;
+  margin-top: 4rem;
+  margin-left: 60px;
+  height: calc(100vh - 4rem);
+}
+
+.layout-navbar {
+  background-color: var(--cyan-100);
+  position: fixed;
+  width: 60px;
+  height: calc(100vh - 4rem);
+  z-index: 999;
+  overflow-y: auto;
+  user-select: none;
+  top: 4rem;
+  left: 0rem;
+  padding-top: 1rem;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.02), 3px 3px 10px rgba(0, 0, 0, 0.05),
+    3px 3px 3px rgba(0, 0, 0, 0.08);
+}
+
+.layout-sidebar {
+  background-color: white;
+  position: fixed;
+  width: 400px;
+  height: calc(100vh - 9rem);
+  z-index: 999;
+  overflow-y: scroll;
+  overflow-x: visible;
+  user-select: none;
+  top: 8rem;
+  left: 5rem;
+  transition: transform 0.2s, left 0.2s;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.02), 3px 3px 10px rgba(0, 0, 0, 0.05),
+    3px 3px 3px rgba(0, 0, 0, 0.08);
+
+  &.sidebar-inactive {
+    left: 0;
+    transform: translateX(-100%);
+  }
+
+  .closeButton {
+    position: absolute;
+    right: 0;
+  }
+}
+
+.title {
+  font-weight: 500;
+  font-size: medium;
+}
+
+.card-content {
+  font-size: small;
+}
+
+.field {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.field input {
+  display: flex;
+  width: 100%;
+  margin-left: 1rem;
+}
+
+.place-card {
+  background: var(--surface-card);
+  // background-color: var(--teal-100);
+  border: 1px solid var(--surface-border);
+  padding: 1rem;
+  margin-bottom: 0.5rem;
+  box-shadow: var(--card-shadow);
+  border-radius: 12px;
+}
+
+.place-card:hover {
+  background-color: rgb(245, 245, 245);
+  cursor: pointer;
+}
+
+.isOpen-badge {
+  border-radius: var(--border-radius);
+  padding: 0.25em 0.5rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+}
+
+.isOpen-badge {
+  &.open {
+    background: #c8e6c9;
+    color: #256029;
+  }
+
+  &.close {
+    background: #ffcdd2;
+    color: #c63737;
+  }
+}
+
+.place-detail-card {
+  background-color: white;
+  position: fixed;
+  width: 400px;
+  height: calc(100vh - 6rem);
+  z-index: 900;
+  overflow-y: auto;
+  overflow-x: auto;
+  user-select: none;
+  top: 5rem;
+  right: 4rem;
+  transition: transform 0.2s, right 0.2s;
+  border-radius: 12px;
+  padding: 1rem 1rem;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.02), 3px 3px 10px rgba(0, 0, 0, 0.05),
+    3px 3px 3px rgba(0, 0, 0, 0.08);
+
+  &.place-detail-inactive {
+    right: 0;
+    transform: translateX(100%);
+  }
+
+  .title {
+    font-weight: 500;
+    font-size: large;
+  }
+
+  // .custom-knob .p-knob .p-knob-text{
+  //   font-size: larger;
+  // }
+}
+
+.place-detail-closeButton {
+  position: absolute;
+  right: 2.5rem; /* Offset by card's right position + button's size */
+  top: 50%;
+  z-index: 999;
+}
+
+.photo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: auto;
+
+  .photo {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    cursor: pointer;
+    transition: background-color 0.3s, opacity 0.3s;
+  }
+
+  .photo:hover {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+    opacity: 0.7;
+  }
+
+  .photo-badge {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    z-index: 10;
+  }
+}
+
+.routeTabCircle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+// .layout-main {
+//   flex: 1 1 auto;
+// }
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Importing Bootstrap SCSS file. */
+// @import "bootstrap/scss/bootstrap";

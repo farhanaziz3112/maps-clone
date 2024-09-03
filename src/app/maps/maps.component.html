@@ -1,0 +1,927 @@
+<div class="layout-topbar">
+  <!-- <p-button
+    class="topbar-menu"
+    icon="pi pi-bars"
+    severity="secondary"
+    size="small"
+    [text]="true"
+    (onClick)="toggleSideMenu()"
+  /> -->
+  <div class="flex w-full justify-content-between align-items-center m-4">
+    <div class="flex" style="color: white">Maps</div>
+    <div class="flex">
+      <p-avatar
+        icon="pi pi-user"
+        pBadge
+        value="2"
+        (click)="menu.toggle($event)"
+      />
+      <p-tieredMenu #menu [model]="profileMenu" [popup]="true" />
+    </div>
+  </div>
+
+  <!-- <input type="text" [(ngModel)]="autoCompleteInput" #addressText /> -->
+  <!-- <input type="text" pInputText [(ngModel)]="autoCompleteInput" #addressText /> -->
+</div>
+<div
+  class="layout-navbar flex flex-column align-items-center justify-content-start"
+>
+  <p-button
+    icon="pi pi-map-marker"
+    severity="secondary"
+    size="large"
+    [text]="true"
+    (onClick)="toggleLocationInfo()"
+  />
+  <p-button
+    icon="pi pi-search"
+    severity="secondary"
+    size="large"
+    [text]="true"
+    (onClick)="togglePlaces()"
+  />
+  <p-button
+    icon="pi pi-directions"
+    severity="secondary"
+    size="large"
+    [text]="true"
+    (onClick)="toggleDirections()"
+  />
+  <p-button
+    icon="pi pi-cog"
+    severity="secondary"
+    size="large"
+    [text]="true"
+    (onClick)="toggleSettings()"
+  />
+</div>
+
+<ng-container *ngIf="viewPlaceDetail">
+  <div class="place-detail-closeButton">
+    <p-button
+      icon="pi pi-chevron-right"
+      severity="primary"
+      size="small"
+      [rounded]="true"
+      (onClick)="togglePlaceDetail()"
+    />
+  </div>
+</ng-container>
+<div class="place-detail-card" [ngClass]="getPlaceDetailStatus()">
+  <ng-container *ngIf="viewPlaceDetail">
+    <!-- <div class="title">Place Details: {{ clickedPlace.name }}</div>
+    <p-button label="Close" (onClick)="togglePlaceDetail()" /> -->
+    <ng-container *ngIf="clickedPlacePhotos">
+      <div class="photo-container">
+        <p-badge
+          class="photo-badge"
+          [value]="clickedPlacePhotos.length"
+        ></p-badge>
+        <img
+          class="photo"
+          [src]="clickedPlacePhotos[0].getUrl(photoOptions)"
+          [alt]="clickedPlace.name"
+          (click)="viewGallery()"
+        />
+      </div>
+    </ng-container>
+    <div class="title mt-3">{{ clickedPlace.name }}</div>
+    <p-divider />
+    <span [class]="'isOpen-badge ' + clickedPlace.isOpen">{{
+      clickedPlace.isOpen
+    }}</span>
+
+    <div class="flex align-items-center justify-content-start mt-3">
+      <span class="mr-2">{{ clickedPlace.rating }}</span>
+      <p-rating
+        [ngModel]="clickedPlace.rating"
+        [readonly]="true"
+        [cancel]="false"
+      ></p-rating>
+      <span class="ml-2" style="color: grey"
+        >({{
+          clickedPlace.userRatingTotal === 0
+            ? "no rating"
+            : clickedPlace.userRatingTotal
+        }})</span
+      >
+    </div>
+    <div class="grid mt-2">
+      <div class="col-1 flex align-items-center justify-content-center">
+        <i class="pi pi-map-marker"></i>
+      </div>
+      <div class="col-11">
+        <div class="card-content">{{ clickedPlace.address }}</div>
+      </div>
+    </div>
+    <div class="grid mt-1">
+      <div class="col-1 flex align-items-center justify-content-center">
+        <i class="pi pi-phone"></i>
+      </div>
+      <div class="col-11">
+        <ng-container
+          *ngIf="clickedPlace.phoneNumber != ''; else noPhoneNumber"
+        >
+          <div class="card-content">{{ clickedPlace.phoneNumber }}</div>
+        </ng-container>
+        <ng-template #noPhoneNumber>
+          <div class="card-content" style="color: grey">
+            No number available
+          </div>
+        </ng-template>
+      </div>
+    </div>
+    <div class="grid mt-1">
+      <div class="col-1 flex align-items-center justify-content-center">
+        <i class="pi pi-directions"></i>
+      </div>
+      <div class="col-11">
+        <p-button
+          label="Get Directions"
+          size="small"
+          severity="primary"
+          [outlined]="true"
+          (onClick)="getDirection(clickedPlace)"
+        />
+      </div>
+    </div>
+    <div class="grid mt-1">
+      <div class="col-1 flex align-items-center justify-content-center">
+        <i class="pi pi-link"></i>
+      </div>
+      <div class="col-11">
+        <ng-container *ngIf="clickedPlace.website != ''; else noWebsite">
+          <a
+            class="text-sm"
+            [href]="clickedPlace.website"
+            target="_blank"
+            rel="noopener noreferrer"
+            >{{ clickedPlace.website }}</a
+          >
+        </ng-container>
+        <ng-template #noWebsite>
+          <div class="card-content" style="color: grey">
+            No website available
+          </div>
+        </ng-template>
+      </div>
+    </div>
+    <p-divider />
+    <ng-container *ngIf="clickedPlace.reviews.length != 0">
+      <div class="text-base font-medium">Reviews</div>
+      <div class="mt-3">
+        <div class="flex">
+          <p-accordion
+            class="w-full"
+            expandIcon="pi pi-angle-down"
+            collapseIcon="pi pi-angle-up"
+          >
+            <ng-container *ngFor="let review of clickedPlace.reviews">
+              <p-accordionTab>
+                <ng-template pTemplate="header">
+                  <span class="flex align-items-center p-0 gap-2 w-full">
+                    <p-avatar
+                      *ngIf="review.profile_photo_url; else labelAvatar"
+                      [image]="getUrl(review.profile_photo_url)"
+                      shape="circle"
+                    />
+                    <ng-template #labelAvatar>
+                      <p-avatar
+                        [label]="review.author_name.charAt(0)"
+                        shape="circle"
+                      />
+                    </ng-template>
+                    <div class="flex flex-column w-full">
+                      <span class="text-sm font-medium">
+                        {{ review.author_name }}
+                      </span>
+                      <div class="text-xs font-light">
+                        {{ review.relative_time_description }}
+                      </div>
+                    </div>
+                    <!-- <p-badge
+                      [value]="review.rating + '/5'"
+                      class="ml-auto mr-2"
+                    /> -->
+                    <div class="flex w-full justify-content-end">
+                      <p-knob
+                        [max]="5"
+                        [(ngModel)]="review.rating"
+                        [strokeWidth]="7"
+                        [readonly]="true"
+                        [size]="50"
+                        [valueTemplate]="review.rating + '/5'"
+                        [valueColor]="
+                          review.rating === 5
+                            ? 'var(--green-600)'
+                            : review.rating === 4
+                            ? 'var(--green-400)'
+                            : review.rating === 3
+                            ? 'var(--yellow-400)'
+                            : review.rating === 2
+                            ? 'var(--yellow-600)'
+                            : 'var(--red-400)'
+                        "
+                      />
+                    </div>
+                  </span>
+                </ng-template>
+                <p class="text-sm">
+                  {{ review.text }}
+                </p>
+              </p-accordionTab>
+            </ng-container>
+          </p-accordion>
+        </div>
+      </div>
+      <div class="flex w-full justify-content-end">
+        <p-button
+          class="mt-1"
+          label="See more"
+          severity="secondary"
+          size="small"
+          [text]="true"
+        />
+      </div>
+    </ng-container>
+  </ng-container>
+</div>
+<p-galleria
+  [value]="clickedPlacePhotos"
+  [(visible)]="displayGallery"
+  [activeIndex]="0"
+  [containerStyle]="{ 'max-width': '800px' }"
+  [fullScreen]="true"
+  [circular]="true"
+  [showItemNavigators]="true"
+  [showThumbnails]="false"
+  [showIndicators]="true"
+  [showIndicatorsOnItem]="true"
+>
+  <ng-template pTemplate="item" let-item>
+    <img
+      [src]="item.getUrl(photoOptions)"
+      style="width: 100%; display: block"
+    />
+  </ng-template>
+  <!-- <ng-template pTemplate="thumbnail" let-item>
+        <div class="grid grid-nogutter justify-content-center">
+          <img [src]="item.getUrl(photoOptions)" style="width: 50px" />
+        </div>
+      </ng-template> -->
+</p-galleria>
+<p-sidebar [(visible)]="viewSearchFilter" position="left">
+  <div class="flex align-items-center">
+    <i class="pi pi-filter mr-2"></i>
+    <div class="title" style="font-size: large">Places Filter</div>
+  </div>
+  <div class="mt-4">Sort</div>
+  <div>
+    <form [formGroup]="placeSortForm">
+      <ng-container *ngFor="let item of placesSortOptions">
+        <div class="mt-2" style="text-align: start">
+          <input type="radio" [value]="item.value" formControlName="sort" />
+          {{ item.label }}
+        </div>
+      </ng-container>
+    </form>
+  </div>
+  <div class="flex align-items-end justify-content-end">
+    <p-button
+      class="mt-1"
+      label="Apply"
+      [raised]="true"
+      size="small"
+      (onClick)="applyPlaceFilter()"
+    />
+  </div>
+</p-sidebar>
+<div class="layout-sidebar" [ngClass]="getSideMenuStatus()">
+  <ng-container *ngIf="viewDirections">
+    <div class="closeButton">
+      <p-button
+        icon="pi pi-times"
+        severity="secondary"
+        [text]="true"
+        size="small"
+        [rounded]="true"
+        (onClick)="toggleSideMenu()"
+      />
+    </div>
+    <div
+      class="flex flex-row mt-3 mb-4 align-items-center justify-content-start"
+    >
+      <i class="pi pi-directions"></i>
+      <div class="title ml-2">Directions</div>
+    </div>
+    <!-- <p-timeline
+        [value]="data"
+        class="w-full md:w-20rem -ml-5"
+        align="left"
+        [style]="{ 'align-items': 'start' }"
+      >
+        <ng-template pTemplate="marker" let-item>
+          <span
+            class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+            [style]="{ 'background-color': 'var(--primary-color)' }"
+          >
+            <i [class]="item.icon"></i>
+          </span>
+        </ng-template>
+        <ng-template pTemplate="content" let-item>
+          {{ item.address }}
+        </ng-template>
+      </p-timeline> -->
+    <!-- <ng-container *ngIf="allRoutesDetails.length != 0">
+      <p-timeline
+        [value]="data"
+        class="w-full md:w-20rem"
+        align="left"
+        [style]="{ 'align-items': 'start' }"
+      >
+        <ng-template pTemplate="marker" let-item>
+          <span
+            class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+            [style]="{ 'background-color': 'var(--primary-color)' }"
+          >
+            <i [class]="item.icon"></i>
+          </span>
+        </ng-template>
+        <ng-template pTemplate="content" let-item>
+          {{ item.address }}
+        </ng-template>
+      </p-timeline>
+    </ng-container> -->
+    <!-- <p-accordion>
+      <p-accordionTab>
+        <ng-template pTemplate="header">
+          <div class="grid w-full">
+            <div class="col-11">Test</div>
+            <div class="col-1">
+              <span
+                class="routeTabCircle"
+                [ngStyle]="{ 'background-color': routeColor[0] }"
+              ></span>
+            </div>
+          </div>
+        </ng-template>
+        <div>Test</div>
+      </p-accordionTab>
+    </p-accordion> -->
+    <!-- <div class="grid justify-content-center align-items-center">
+      <div
+        class="col-2 flex justify-content-center align-items-center"
+      >
+        <span
+          class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+          [style]="{ 'background-color': 'var(--primary-color)' }"
+        >
+          <i [class]="data[0].icon"></i>
+        </span>
+      </div>
+      <div
+        class="col-10 flex text-left justify-content-center align-items-center"
+      >
+        {{ data[0].address }}
+      </div>
+    </div>
+    <p-divider align="center" type="solid">
+      <b>to</b>
+    </p-divider>
+    <div class="grid mb-5 justify-content-center align-items-center">
+      <div
+        class="col-2 flex justify-content-center align-items-center"
+      >
+        <span
+          class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+          [style]="{ 'background-color': 'var(--primary-color)' }"
+        >
+          <i [class]="data[0].icon"></i>
+        </span>
+      </div>
+      <div
+        class="col-10 flex text-left justify-content-center align-items-center"
+      >
+        {{ data[0].address }}
+      </div>
+    </div> -->
+    <ng-container *ngIf="allRoutesDetails.length != 0">
+      <div class="grid justify-content-center align-items-center">
+        <div class="col-2 flex justify-content-center align-items-center">
+          <span
+            class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+            [style]="{ 'background-color': 'var(--primary-color)' }"
+          >
+            <i [class]="allRoutesDetails[0].startEndAddress[0].icon"></i>
+          </span>
+        </div>
+        <div
+          class="col-10 flex text-left justify-content-center align-items-center"
+        >
+          {{ allRoutesDetails[0].startEndAddress[0].address }}
+        </div>
+      </div>
+      <p-divider align="center" type="solid">
+        <b>to</b>
+      </p-divider>
+      <div class="grid mb-5 justify-content-center align-items-center">
+        <div class="col-2 flex justify-content-center align-items-center">
+          <span
+            class="flex w-2rem h-2rem align-items-center justify-content-center text-white border-circle z-1 shadow-1"
+            [style]="{ 'background-color': 'var(--primary-color)' }"
+          >
+            <i [class]="allRoutesDetails[1].startEndAddress[1].icon"></i>
+          </span>
+        </div>
+        <div
+          class="col-10 flex text-left justify-content-center align-items-center"
+        >
+          {{ allRoutesDetails[1].startEndAddress[1].address }}
+        </div>
+      </div>
+    </ng-container>
+    <ng-container
+      class="mt-5"
+      *ngFor="let route of allRoutesDetails; index as i"
+    >
+      <!-- <div class="card flex flex-column w-full">
+        {{ route.summary }}
+        <ng-container *ngFor="let step of route.legs[0].steps">
+          <div class="card">
+            <div [innerHTML]="step.instructions"></div>
+          </div>
+        </ng-container>
+      </div> -->
+      <p-accordion>
+        <p-accordionTab>
+          <ng-template pTemplate="header">
+            <div class="grid w-full">
+              <div class="col-11">
+                <div class="flex flex-column w-full">
+                  <div>{{ route.summary }}</div>
+                  <div
+                    class="flex w-full text-sm font-normal"
+                    style="color: green"
+                  >
+                    {{ route.legs[0].distance.text }}
+                  </div>
+                  <div
+                    class="flex w-full text-sm font-normal"
+                    style="color: green"
+                  >
+                    {{ route.legs[0].duration.text }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-1">
+              <span
+                class="routeTabCircle"
+                [ngStyle]="{ 'background-color': routeColor[i] }"
+              ></span>
+            </div>
+          </ng-template>
+          <!-- <ng-container *ngFor="let step of route.legs[0].steps">
+            <div class="card">
+              <div [innerHTML]="step.instructions"></div>
+            </div>
+          </ng-container> -->
+          <p-timeline
+            [value]="route.legs[0].steps"
+            class="w-full md:w-20rem"
+            align="alternate"
+          >
+            <ng-template pTemplate="content" let-step>
+              <div [innerHTML]="step.instructions"></div>
+            </ng-template>
+          </p-timeline>
+        </p-accordionTab>
+      </p-accordion>
+    </ng-container>
+  </ng-container>
+  <ng-container *ngIf="viewLocationInfo">
+    <div class="closeButton">
+      <p-button
+        icon="pi pi-times"
+        severity="secondary"
+        [text]="true"
+        size="small"
+        [rounded]="true"
+        (onClick)="toggleSideMenu()"
+      />
+    </div>
+    <div
+      class="flex flex-row mt-3 mb-4 align-items-center justify-content-start"
+    >
+      <i class="pi pi-map-marker"></i>
+      <div class="title ml-2">Location Information</div>
+    </div>
+    <div class="card">
+      <div class="flex flex-column">
+        <div
+          class="flex flex-row align-items-center justify-content-start mb-1"
+        >
+          <!-- <i class="pi pi-mobile"></i> -->
+          <div class="title">Device Location</div>
+        </div>
+        <div class="card-content">Lat: {{ deviceLocation.lat }}</div>
+        <div class="card-content">Lng: {{ deviceLocation.lng }}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="flex flex-column">
+        <div
+          class="flex flex-row align-items-center justify-content-start mb-1"
+        >
+          <!-- <i class="pi pi-mobile"></i> -->
+          <div class="title">Mouse Click</div>
+        </div>
+        <div class="card-content">Latitude: {{ clickLocation.lat }}</div>
+        <div class="card-content">Longitude: {{ clickLocation.lng }}</div>
+        <div
+          class="flex flex-row align-items-center justify-content-center mt-3 mb-3"
+        >
+          <p-button
+            class="mr-2"
+            label="Clear"
+            [raised]="true"
+            (onClick)="clearAddedMarkers()"
+            size="small"
+          />
+          <p-button
+            label="Add New Marker"
+            [raised]="true"
+            (onClick)="addNewMarker()"
+            size="small"
+          />
+        </div>
+      </div>
+      <ng-container *ngFor="let marker of addedMarkers">
+        <div class="card">
+          <div class="title">{{ marker.title }}</div>
+          <div class="card-content">Lat: {{ marker.position.lat }}</div>
+          <div class="card-content">Lng: {{ marker.position.lng }}</div>
+          <div class="flex align-items-center justify-content-end">
+            <p-button
+              label="Go Here"
+              [raised]="true"
+              (onClick)="goTo(marker)"
+              size="small"
+              severity="info"
+            />
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="card">
+      <div class="flex flex-column">
+        <div
+          class="flex flex-row align-items-center justify-content-start mb-1"
+        >
+          <div class="title">Insert Coordinate</div>
+        </div>
+        <form [formGroup]="coordinateForm" (ngSubmit)="searchCoordinate()">
+          <div class="field">
+            <label htmlFor="name">Lat:</label>
+            <input
+              pInputText
+              type="text"
+              name="lat"
+              placeholder="Latitude"
+              formControlName="lat"
+            />
+          </div>
+          <div class="field">
+            <label htmlFor="name">Lng:</label>
+            <input
+              pInputText
+              type="text"
+              name="lng"
+              placeholder="Longitude"
+              formControlName="lng"
+            />
+          </div>
+          <div
+            style="display: flex; align-items: center; justify-content: center"
+          >
+            <p-button
+              label="Search"
+              [raised]="true"
+              (onClick)="searchCoordinate()"
+              size="small"
+            />
+          </div>
+        </form>
+      </div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="viewPlaces">
+    <div class="closeButton">
+      <p-button
+        icon="pi pi-times"
+        severity="secondary"
+        [text]="true"
+        size="small"
+        [rounded]="true"
+        (onClick)="toggleSideMenu()"
+      />
+    </div>
+    <div
+      class="flex flex-row mt-3 mb-4 align-items-center justify-content-start"
+    >
+      <i class="pi pi-search"></i>
+      <div class="title ml-2">Search Places</div>
+    </div>
+    <div class="flex flex-column mt-5">
+      <div
+        style="
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <!-- <input
+          pInputText
+          type="text"
+          [(ngModel)]="autoCompleteInput"
+          #addressText
+        /> -->
+        <form [formGroup]="searchPlaceForm">
+          <div
+            class="flex align-items-center justify-content-center"
+            style="width: 100%"
+          >
+            <span class="p-input-icon-right">
+              <input
+                type="text"
+                name="name"
+                pInputText
+                placeholder="Search"
+                style="width: 100%"
+                formControlName="name"
+                #addressText
+              />
+              <i class="pi pi-search"></i>
+            </span>
+            <p-button
+              class="ml-1"
+              label="Search"
+              [raised]="true"
+              size="small"
+              (onClick)="searchPlaces()"
+            />
+          </div>
+        </form>
+
+        <div class="flex flex-row flex-wrap mt-3">
+          <ng-container *ngFor="let place of placesType">
+            <div class="flex mx-1 my-1">
+              <p-button
+                size="small"
+                severity="info"
+                (onClick)="findNearbyPlaces(place, 5000)"
+                [raised]="true"
+              >
+                <div [innerHTML]="sanitizeSvg(place.smallSvg)"></div>
+                <span class="ml-2" style="font-weight: 600">{{
+                  place.label
+                }}</span>
+              </p-button>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <ng-container *ngIf="searchedPlaces.length != 0">
+        <div class="mt-4">
+          <div class="flex align-items-center justify-content-between">
+            <div class="title mb-3">Search Result</div>
+            <p-button
+              class="mb-3"
+              icon="pi pi-filter"
+              severity="secondary"
+              [text]="true"
+              size="small"
+              [rounded]="true"
+              (click)="viewSearchFilter = true"
+            />
+          </div>
+          <ng-container *ngFor="let place of searchedPlaces">
+            <div class="flex flex-column">
+              <div class="place-card" (click)="onPlaceCardClick(place)">
+                <div class="title">{{ place.name }}</div>
+                <!-- <div>Lat: {{ place.position.lat }}</div>
+                <div>Lng: {{ place.position.lng }}</div> -->
+                <!-- <div>Rating: {{ place.rating }}</div> -->
+                <div class="mt-2">
+                  <span [class]="'isOpen-badge ' + place.isOpen">{{
+                    place.isOpen
+                  }}</span>
+                </div>
+                <div class="flex align-items-center justify-content-start mt-2">
+                  <span class="mr-2" style="color: grey">{{
+                    place.rating
+                  }}</span>
+                  <p-rating
+                    [ngModel]="place.rating"
+                    [readonly]="true"
+                    [cancel]="false"
+                  ></p-rating>
+                </div>
+                <!-- <a [href]="place.website">{{ place.website }}</a> -->
+                <div class="mt-1 card-content">{{ place.address }}</div>
+                <!-- <img [src]="place.photos[0]?.getUrl(photoOptions)" alt="" />
+                <p-button
+                  label="Go Here"
+                  [raised]="true"
+                  (onClick)="goTo(place)"
+                  size="small"
+                  severity="info"
+                /> -->
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="nearbyPlaces.length != 0">
+        <div class="mt-4">
+          <div class="flex align-items-center justify-content-between">
+            <div class="title mb-3">
+              Nearby Places ({{ clickedTypeOfPlace.label }})
+            </div>
+            <p-button
+              class="mb-3"
+              icon="pi pi-filter"
+              severity="secondary"
+              [text]="true"
+              size="small"
+              [rounded]="true"
+              (click)="viewSearchFilter = true"
+            />
+          </div>
+          <ng-container *ngFor="let place of nearbyPlaces">
+            <div class="flex flex-column">
+              <div class="place-card" (click)="onPlaceCardClick(place)">
+                <div class="title">{{ place.name }}</div>
+                <!-- <div>Lat: {{ place.position.lat }}</div>
+                <div>Lng: {{ place.position.lng }}</div> -->
+                <!-- <div>Rating: {{ place.rating }}</div> -->
+                <div class="mt-2">
+                  <span [class]="'isOpen-badge ' + place.isOpen">{{
+                    place.isOpen
+                  }}</span>
+                </div>
+                <div class="flex align-items-center justify-content-start mt-2">
+                  <span class="mr-2">{{ place.rating }}</span>
+                  <p-rating
+                    [ngModel]="place.rating"
+                    [readonly]="true"
+                    [cancel]="false"
+                  ></p-rating>
+                  <span class="ml-2" style="color: grey"
+                    >({{
+                      place.userRatingTotal === 0
+                        ? "no rating"
+                        : place.userRatingTotal
+                    }})</span
+                  >
+                </div>
+                <!-- <a [href]="place.website">{{ place.website }}</a> -->
+                <div class="mt-1 card-content">{{ place.address }}</div>
+                <!-- <img [src]="place.photos[0]?.getUrl(photoOptions)" alt="" />
+                <p-button
+                  label="Go Here"
+                  [raised]="true"
+                  (onClick)="goTo(place)"
+                  size="small"
+                  severity="info"
+                /> -->
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </ng-container>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="viewSettings">
+    <div class="closeButton">
+      <p-button
+        icon="pi pi-times"
+        severity="secondary"
+        [text]="true"
+        size="small"
+        [rounded]="true"
+        (onClick)="toggleSideMenu()"
+      />
+    </div>
+    <div class="title mt-2">Random Location</div>
+    <div class="mt-2 flex align-items-center justify-content-center">
+      <p-button
+        class="mr-2"
+        label="Clear"
+        [raised]="true"
+        (onClick)="clearRandomLocation()"
+        size="small"
+        severity="info"
+      />
+      <p-button
+        label="Generate"
+        [raised]="true"
+        (onClick)="generateRandomLocation(20)"
+        size="small"
+        severity="info"
+      />
+    </div>
+    <ng-container *ngFor="let marker of randomLocations; index as i">
+      <div style="display: flex; flex-direction: column; margin-top: 1rem">
+        <div class="card">
+          <div class="title">Location {{ i + 1 }}</div>
+          <div class="card-content">Lat: {{ marker.position.lat }}</div>
+          <div class="card-content">Lng: {{ marker.position.lng }}</div>
+          <div class="flex justify-content-end">
+            <p-button
+              label="Go Here"
+              [raised]="true"
+              (onClick)="goTo(marker)"
+              size="small"
+              severity="info"
+            />
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <!-- <div class="content-container">
+    <div class="title" style="margin-top: 1rem">Marker Clicked</div>
+    <div>Latitude: {{ clickedMarkerLat }}</div>
+    <div>Longitude: {{ clickedMarkerLng }}</div>
+  </div> -->
+</div>
+<div class="layout-main-container">
+  <google-map
+    height="100%"
+    width="100%"
+    [options]="options"
+    (mapClick)="clickMap($event)"
+  >
+    <ng-container *ngFor="let route of allRoutesPath; index as i">
+      <map-polyline
+        [path]="route"
+        [options]="{ strokeColor: routeColor[i], strokeWeight: 5 }"
+      />
+    </ng-container>
+    <map-advanced-marker
+      #markerElem="mapAdvancedMarker"
+      [position]="clickLocation"
+      (mapClick)="onMarkerClick(markerElem)"
+    />
+    <ng-container *ngIf="clickedPlace">
+      <map-advanced-marker
+        #markerElem="mapAdvancedMarker"
+        [position]="clickedPlace.position"
+        [title]="clickedPlace.title"
+        [content]="clickedPlace.content"
+        (mapClick)="onMarkerClick(markerElem)"
+      />
+    </ng-container>
+    @for (marker of addedMarkers; track marker; let index = $index) {
+    <map-advanced-marker
+      #markerElem="mapAdvancedMarker"
+      [position]="marker.position"
+      [title]="marker.title"
+      [content]="marker.content"
+      (mapClick)="onMarkerClick(markerElem)"
+    />
+    } @for (marker of randomLocations; track marker; let index = $index) {
+    <map-advanced-marker
+      #markerElem="mapAdvancedMarker"
+      [position]="marker.position"
+      [title]="marker.title"
+      [content]="marker.content"
+      (mapClick)="onMarkerClick(markerElem)"
+    />
+    } @for (marker of nearbyPlaces; track marker; let index = $index) {
+    <map-advanced-marker
+      #markerElem="mapAdvancedMarker"
+      [position]="marker.position"
+      [title]="marker.name"
+      [content]="marker.content"
+      (mapClick)="onMarkerClick(markerElem)"
+    />
+    } @for (marker of searchedPlaces; track marker; let index = $index) {
+    <map-advanced-marker
+      #markerElem="mapAdvancedMarker"
+      [position]="marker.position"
+      [title]="marker.name"
+      [content]="marker.content"
+      (mapClick)="onMarkerClick(markerElem)"
+    />
+    }
+    <map-info-window #infoWindow></map-info-window>
+  </google-map>
+</div>
